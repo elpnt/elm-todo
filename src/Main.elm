@@ -9,11 +9,10 @@ import Html.Events exposing (..)
 
 
 main =
-  Browser.document
+  Browser.sandbox
     { init = init
-    , view = \model -> { title = "HELLO TODO", body = [ view model ] }
     , update = update
-    , subscriptions = \_ -> Sub.none
+    , view = view
     }
 
 
@@ -26,26 +25,13 @@ type alias Todo = String
 
 type alias Model =
   { newTodo : Todo
-  , id : Int
   , todoList : List Todo
-  , doneList : List Todo
   }
 
 
-initialModel : Model
-initialModel =
-  { newTodo = ""
-  , id = 0
-  , todoList = []
-  , doneList = []
-  }
-
-
-init : () -> ( Model, Cmd Msg )
-init _ =
-  ( initialModel
-  , Cmd.none
-  )
+init : Model
+init =
+  Model "" []
 
 
 
@@ -56,44 +42,23 @@ type Msg
   = NoOp
   | UpdateForm Todo
   | UpdateTodoList (List Todo)
-  | CompleteTask Int
   | ClearAll (List Todo)
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
+update : Msg -> Model -> Model
 update msg model =
   case msg of
     NoOp ->
-      ( model
-      , Cmd.none
-      )
+      model
 
     UpdateForm todo ->
-      ( { model | newTodo = todo }
-      , Cmd.none
-      )
+      { model | newTodo = todo }
 
     UpdateTodoList todolist ->
-      ( { model | todoList = model.newTodo :: todolist
-                , id = model.id + 1 }
-      , Cmd.none
-      )
-
-    CompleteTask uid ->
-      ( { model | todoList = updateTodoListWhenCompleted uid model.todoList
-                , doneList = "a" :: model.doneList }
-      , Cmd.none
-      )
+      { model | todoList = model.newTodo :: todolist }
 
     ClearAll todolist ->
-      ( { model | todoList = [] }
-      , Cmd.none
-      )
-
-
-updateTodoListWhenCompleted : Int -> List Todo -> List Todo
-updateTodoListWhenCompleted idx todolist =
-  (List.take idx todolist) ++ (List.drop idx todolist)
+      { model | todoList = [] }
 
 
 -- VIEW
@@ -111,20 +76,8 @@ view model =
         []
     , button [ onClick ( UpdateTodoList model.todoList ) ] [ text "Add" ]
     , viewTodoList model.todoList
-    , viewDoneList model.doneList
     , button [ onClick ( ClearAll model.todoList ) ] [ text "Clear All" ]
     ]
-
-
-initialForm : Html Msg
-initialForm =
-  input
-    [ type_ "text"
-    , placeholder "Add TODO"
-    , value ""
-    , onInput UpdateForm
-    ]
-    []
 
 
 viewTodoList : List Todo -> Html Msg
@@ -134,19 +87,4 @@ viewTodoList todolist =
 
 viewTodo : Todo -> Html Msg
 viewTodo todo =
-  li []
-    [ div []
-        [ text todo
-        , button [ onClick ( CompleteTask 1 ) ] [ text "Done!" ]
-        ]
-    ]
-
-
-viewDoneList : List Todo -> Html Msg
-viewDoneList donelist =
-  ul [] ( List.map viewDone donelist )
-
-
-viewDone : Todo -> Html Msg
-viewDone done =
-  li [] [ text done ]
+  li [] [ text todo ]
