@@ -20,12 +20,12 @@ main =
 -- MODEL
 
 
-type alias Task = String
+type alias Todo = String
 
 
 type alias Model =
-  { newTask : Task
-  , taskList : List Task
+  { newTodo : Todo
+  , todoList : List Todo
   }
 
 
@@ -40,8 +40,9 @@ init =
 
 type Msg
   = NoOp
-  | Add Task
-  | UpdateTaskList (List Task)
+  | UpdateForm Todo
+  | UpdateTodoList (List Todo)
+  | ClearAll (List Todo)
 
 
 update : Msg -> Model -> Model
@@ -50,11 +51,14 @@ update msg model =
     NoOp ->
       model
 
-    Add task ->
-      { model | newTask = task }
+    UpdateForm todo ->
+      { model | newTodo = todo }
 
-    UpdateTaskList tasklist ->
-      { model | taskList = model.newTask :: tasklist }
+    UpdateTodoList todolist ->
+      { model | todoList = model.newTodo :: todolist }
+
+    ClearAll todolist ->
+      { model | todoList = [] }
 
 
 -- VIEW
@@ -67,19 +71,20 @@ view model =
     , input
         [ type_ "text"
         , placeholder "Add TODO"
-        , onInput Add
+        , onInput UpdateForm
         ]
         []
-    , button [ onClick ( UpdateTaskList model.taskList ) ] [ text "Add" ]
-    , viewTaskList model.taskList
+    , button [ onClick ( UpdateTodoList model.todoList ) ] [ text "Add" ]
+    , viewTodoList model.todoList
+    , button [ onClick ( ClearAll model.todoList ) ] [ text "Clear All" ]
     ]
 
 
-viewTaskList : List Task -> Html Msg
-viewTaskList tasklist =
-  ul [] ( List.map viewTask tasklist )
+viewTodoList : List Todo -> Html Msg
+viewTodoList todolist =
+  ul [] ( List.map viewTodo todolist )
 
 
-viewTask : Task -> Html Msg
-viewTask task =
-  li [] [ text task ]
+viewTodo : Todo -> Html Msg
+viewTodo todo =
+  li [] [ text todo ]
