@@ -20,31 +20,41 @@ main =
 -- MODEL
 
 
+type alias Task = String
+
+
 type alias Model =
-  { newTodo : String
-  -- , todoList : List String
+  { newTask : Task
+  , taskList : List Task
   }
 
 
 init : Model
 init =
-  -- Model "" []
-  Model ""
+  Model "" []
+
 
 
 -- UPDATE
 
 
 type Msg
-  = Change String
+  = NoOp
+  | Add Task
+  | UpdateTaskList (List Task)
 
 
 update : Msg -> Model -> Model
 update msg model =
   case msg of
-    Change newTodo ->
-      { model | newTodo = newTodo }
+    NoOp ->
+      model
 
+    Add task ->
+      { model | newTask = task }
+
+    UpdateTaskList tasklist ->
+      { model | taskList = model.newTask :: tasklist }
 
 
 -- VIEW
@@ -53,8 +63,23 @@ update msg model =
 view : Model -> Html Msg
 view model =
   div []
-    [ input [ placeholder "Input your TODO", value model.newTodo, onInput Change
-    ] []
-    , div [] [ text model.newTodo ]]
+    [ h1 [] [ text "ToDo App" ]
+    , input
+        [ type_ "text"
+        , placeholder "Add TODO"
+        , onInput Add
+        ]
+        []
+    , button [ onClick ( UpdateTaskList model.taskList ) ] [ text "Add" ]
+    , viewTaskList model.taskList
+    ]
 
 
+viewTaskList : List Task -> Html Msg
+viewTaskList tasklist =
+  ul [] ( List.map viewTask tasklist )
+
+
+viewTask : Task -> Html Msg
+viewTask task =
+  li [] [ text task ]
