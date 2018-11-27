@@ -2,6 +2,8 @@ import Browser
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
+import Html.Lazy exposing (lazy)
+import Html.Keyed as Keyed
 
 
 
@@ -25,7 +27,7 @@ type alias Todo = String
 
 
 type alias Model =
-  { newTodo : Todo
+  { field : Todo
   , id : Int
   , todoList : List Todo
   , doneList : List Todo
@@ -34,7 +36,7 @@ type alias Model =
 
 initialModel : Model
 initialModel =
-  { newTodo = ""
+  { field = ""
   , id = 0
   , todoList = []
   , doneList = []
@@ -54,7 +56,7 @@ init _ =
 
 type Msg
   = NoOp
-  | UpdateForm Todo
+  | UpdateField Todo
   | UpdateTodoList (List Todo)
   | CompleteTask Int
   | ClearAll (List Todo)
@@ -68,14 +70,15 @@ update msg model =
       , Cmd.none
       )
 
-    UpdateForm todo ->
-      ( { model | newTodo = todo }
+    UpdateField todo ->
+      ( { model | field = todo }
       , Cmd.none
       )
 
     UpdateTodoList todolist ->
-      ( { model | todoList = model.newTodo :: todolist
-                , id = model.id + 1 }
+      ( { model | todoList = model.field :: todolist
+                , id = model.id + 1
+                , field = "" }
       , Cmd.none
       )
 
@@ -102,29 +105,30 @@ updateTodoListWhenCompleted idx todolist =
 view : Model -> Html Msg
 view model =
   div []
-    [ h1 [] [ text "ToDo App" ]
-    , input
-        [ type_ "text"
-        , placeholder "Add TODO"
-        , onInput UpdateForm
-        ]
-        []
+    [ h1 [] [ text "ToDo App by Elm" ]
+    , renderInput model
     , button [ onClick ( UpdateTodoList model.todoList ) ] [ text "Add" ]
     , viewTodoList model.todoList
-    , viewDoneList model.doneList
+    -- , viewDoneList model.doneList
     , button [ onClick ( ClearAll model.todoList ) ] [ text "Clear All" ]
     ]
 
 
-initialForm : Html Msg
-initialForm =
-  input
-    [ type_ "text"
-    , placeholder "Add TODO"
-    , value ""
-    , onInput UpdateForm
-    ]
+renderInput : Model -> Html Msg
+renderInput model =
+  Keyed.node "div"
     []
+    [ ( "a" -- String.fromInt model.id
+      , input
+          [ type_ "text"
+          , placeholder "Something to do"
+          , autofocus True
+          , value model.field
+          , onInput UpdateField
+          ]
+          []
+      )
+    ]
 
 
 viewTodoList : List Todo -> Html Msg
@@ -137,7 +141,7 @@ viewTodo todo =
   li []
     [ div []
         [ text todo
-        , button [ onClick ( CompleteTask 1 ) ] [ text "Done!" ]
+        -- , button [ onClick ( CompleteTask 1 ) ] [ text "Done!" ]
         ]
     ]
 
