@@ -122,20 +122,36 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-  div []
-    [ h1 [] [ text "ToDo App by Elm" ]
-    , lazy viewInput model
-    , button [ onClick ( UpdateEntries) ] [ text "Add" ]
-    , lazy2 viewEntries False model.entries  -- not done yet
-    , lazy2 viewEntries True model.entries   -- completed!
+  div
+    [ class "todo-app" ]
+    [ header
+        []
+        [ h1 [] [ text "ToDo App by Elm" ]
+        , lazy viewInput model
+        , p [ class "input-area" ]
+            [ button
+                [ onClick ( UpdateEntries) ]
+                [ text "Add" ]
+            ]
+        ]
+    , section
+        [ class "active-task" ]
+        [ h2 [] [ text "Active" ]
+        , lazy2 viewEntries False model.entries
+        ]
+    , section
+        [ class "completed-task" ]
+        [ h2 [] [ text "Completed" ]
+        , lazy2 viewEntries True model.entries
+        ]
     , button [ onClick ( ClearAll ) ] [ text "Clear All" ]
     ]
 
 
 viewInput : Model -> Html Msg
 viewInput model =
-  Keyed.node "div"
-    []
+  Keyed.node "p"
+    [ class "input-area" ]
     [ ( "aaa"
       , input
           [ type_ "text"

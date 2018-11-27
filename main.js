@@ -5047,6 +5047,7 @@ var elm$html$Html$Attributes$stringProperty = F2(
 			key,
 			elm$json$Json$Encode$string(string));
 	});
+var elm$html$Html$Attributes$class = elm$html$Html$Attributes$stringProperty('className');
 var elm$html$Html$Attributes$placeholder = elm$html$Html$Attributes$stringProperty('placeholder');
 var elm$html$Html$Attributes$type_ = elm$html$Html$Attributes$stringProperty('type');
 var elm$html$Html$Attributes$value = elm$html$Html$Attributes$stringProperty('value');
@@ -5086,8 +5087,11 @@ var elm$html$Html$Events$onInput = function (tagger) {
 var author$project$Main$viewInput = function (model) {
 	return A3(
 		elm$html$Html$Keyed$node,
-		'div',
-		_List_Nil,
+		'p',
+		_List_fromArray(
+			[
+				elm$html$Html$Attributes$class('input-area')
+			]),
 		_List_fromArray(
 			[
 				_Utils_Tuple2(
@@ -5106,34 +5110,88 @@ var author$project$Main$viewInput = function (model) {
 			]));
 };
 var elm$html$Html$h1 = _VirtualDom_node('h1');
+var elm$html$Html$h2 = _VirtualDom_node('h2');
+var elm$html$Html$header = _VirtualDom_node('header');
+var elm$html$Html$p = _VirtualDom_node('p');
+var elm$html$Html$section = _VirtualDom_node('section');
 var elm$virtual_dom$VirtualDom$lazy2 = _VirtualDom_lazy2;
 var elm$html$Html$Lazy$lazy2 = elm$virtual_dom$VirtualDom$lazy2;
 var author$project$Main$view = function (model) {
 	return A2(
 		elm$html$Html$div,
-		_List_Nil,
+		_List_fromArray(
+			[
+				elm$html$Html$Attributes$class('todo-app')
+			]),
 		_List_fromArray(
 			[
 				A2(
-				elm$html$Html$h1,
+				elm$html$Html$header,
 				_List_Nil,
 				_List_fromArray(
 					[
-						elm$html$Html$text('ToDo App by Elm')
+						A2(
+						elm$html$Html$h1,
+						_List_Nil,
+						_List_fromArray(
+							[
+								elm$html$Html$text('ToDo App by Elm')
+							])),
+						A2(elm$html$Html$Lazy$lazy, author$project$Main$viewInput, model),
+						A2(
+						elm$html$Html$p,
+						_List_fromArray(
+							[
+								elm$html$Html$Attributes$class('input-area')
+							]),
+						_List_fromArray(
+							[
+								A2(
+								elm$html$Html$button,
+								_List_fromArray(
+									[
+										elm$html$Html$Events$onClick(author$project$Main$UpdateEntries)
+									]),
+								_List_fromArray(
+									[
+										elm$html$Html$text('Add')
+									]))
+							]))
 					])),
-				A2(elm$html$Html$Lazy$lazy, author$project$Main$viewInput, model),
 				A2(
-				elm$html$Html$button,
+				elm$html$Html$section,
 				_List_fromArray(
 					[
-						elm$html$Html$Events$onClick(author$project$Main$UpdateEntries)
+						elm$html$Html$Attributes$class('active-task')
 					]),
 				_List_fromArray(
 					[
-						elm$html$Html$text('Add')
+						A2(
+						elm$html$Html$h2,
+						_List_Nil,
+						_List_fromArray(
+							[
+								elm$html$Html$text('Active')
+							])),
+						A3(elm$html$Html$Lazy$lazy2, author$project$Main$viewEntries, false, model.entries)
 					])),
-				A3(elm$html$Html$Lazy$lazy2, author$project$Main$viewEntries, false, model.entries),
-				A3(elm$html$Html$Lazy$lazy2, author$project$Main$viewEntries, true, model.entries),
+				A2(
+				elm$html$Html$section,
+				_List_fromArray(
+					[
+						elm$html$Html$Attributes$class('completed-task')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						elm$html$Html$h2,
+						_List_Nil,
+						_List_fromArray(
+							[
+								elm$html$Html$text('Completed')
+							])),
+						A3(elm$html$Html$Lazy$lazy2, author$project$Main$viewEntries, true, model.entries)
+					])),
 				A2(
 				elm$html$Html$button,
 				_List_fromArray(
