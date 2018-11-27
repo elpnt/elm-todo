@@ -5077,6 +5077,20 @@ var author$project$Main$viewEntries = F2(
 var author$project$Main$UpdateField = function (a) {
 	return {$: 'UpdateField', a: a};
 };
+var elm$json$Json$Decode$field = _Json_decodeField;
+var elm$json$Json$Decode$int = _Json_decodeInt;
+var elm$html$Html$Events$keyCode = A2(elm$json$Json$Decode$field, 'keyCode', elm$json$Json$Decode$int);
+var elm$json$Json$Decode$andThen = _Json_andThen;
+var elm$json$Json$Decode$fail = _Json_fail;
+var author$project$Main$onEnter = function (msg) {
+	var isEnter = function (code) {
+		return (code === 13) ? elm$json$Json$Decode$succeed(msg) : elm$json$Json$Decode$fail('not ENTER');
+	};
+	return A2(
+		elm$html$Html$Events$on,
+		'keydown',
+		A2(elm$json$Json$Decode$andThen, isEnter, elm$html$Html$Events$keyCode));
+};
 var elm$html$Html$Attributes$autofocus = elm$html$Html$Attributes$boolProperty('autofocus');
 var elm$html$Html$Attributes$placeholder = elm$html$Html$Attributes$stringProperty('placeholder');
 var elm$html$Html$Attributes$value = elm$html$Html$Attributes$stringProperty('value');
@@ -5093,7 +5107,6 @@ var elm$html$Html$Events$stopPropagationOn = F2(
 			event,
 			elm$virtual_dom$VirtualDom$MayStopPropagation(decoder));
 	});
-var elm$json$Json$Decode$field = _Json_decodeField;
 var elm$json$Json$Decode$at = F2(
 	function (fields, decoder) {
 		return A3(elm$core$List$foldr, elm$json$Json$Decode$field, decoder, fields);
@@ -5133,7 +5146,8 @@ var author$project$Main$viewInput = function (model) {
 							elm$html$Html$Attributes$placeholder('Add new task here...'),
 							elm$html$Html$Attributes$autofocus(true),
 							elm$html$Html$Attributes$value(model.field),
-							elm$html$Html$Events$onInput(author$project$Main$UpdateField)
+							elm$html$Html$Events$onInput(author$project$Main$UpdateField),
+							author$project$Main$onEnter(author$project$Main$UpdateEntries)
 						]),
 					_List_Nil))
 			]));
@@ -5222,7 +5236,7 @@ var author$project$Main$view = function (model) {
 							]),
 						_List_fromArray(
 							[
-								elm$html$Html$text('Clear Completed Task')
+								elm$html$Html$text('Clear Completed Tasks')
 							])),
 						A2(
 						elm$html$Html$button,

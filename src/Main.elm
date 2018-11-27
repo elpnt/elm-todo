@@ -4,7 +4,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Html.Lazy exposing (lazy, lazy2)
 import Html.Keyed as Keyed
-import Json exposing (Decode)
+import Json.Decode as Json
 
 
 
@@ -151,7 +151,7 @@ view model =
         [ lazy2 viewEntries True model.entries ]
     , div
         [ class "control" ]
-        [ button [ onClick ( ClearCompleted ) ] [ text "Clear Completed Task" ]
+        [ button [ onClick ( ClearCompleted ) ] [ text "Clear Completed Tasks" ]
         , button [ onClick ( ClearAll ) ] [ text "Clear All" ]
         ]
     ]
@@ -161,11 +161,11 @@ onEnter msg =
     let
         isEnter code =
             if code == 13 then
-                Decod.succeed msg
+                Json.succeed msg
             else
-                Decod.fail "not ENTER"
+                Json.fail "not ENTER"
     in
-        on "keydown" (Decod.andThen isEnter keyCode)
+        on "keydown" (Json.andThen isEnter keyCode)
 
 
 viewInput : Model -> Html Msg
@@ -179,7 +179,7 @@ viewInput model =
           , autofocus True
           , value model.field
           , onInput UpdateField
-					, onEnter UpdateEntries
+          , onEnter UpdateEntries
           ]
           []
       )
