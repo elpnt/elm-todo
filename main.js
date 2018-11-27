@@ -4795,6 +4795,7 @@ var author$project$Main$newEntry = F2(
 	function (content, id) {
 		return {completed: false, content: content, id: id};
 	});
+var elm$core$Basics$not = _Basics_not;
 var elm$core$List$foldrHelper = F4(
 	function (fn, acc, ctr, ls) {
 		if (!ls.b) {
@@ -4850,6 +4851,17 @@ var elm$core$List$foldr = F3(
 	function (fn, acc, ls) {
 		return A4(elm$core$List$foldrHelper, fn, acc, 0, ls);
 	});
+var elm$core$List$filter = F2(
+	function (isGood, list) {
+		return A3(
+			elm$core$List$foldr,
+			F2(
+				function (x, xs) {
+					return isGood(x) ? A2(elm$core$List$cons, x, xs) : xs;
+				}),
+			_List_Nil,
+			list);
+	});
 var elm$core$List$map = F2(
 	function (f, xs) {
 		return A3(
@@ -4894,18 +4906,31 @@ var author$project$Main$update = F2(
 							uid: model.uid + 1
 						}),
 					elm$core$Platform$Cmd$none);
-			case 'Complete':
+			case 'Check':
 				var id = msg.a;
 				var updateEntry = function (entry) {
 					return _Utils_eq(entry.id, id) ? _Utils_update(
 						entry,
-						{completed: true}) : entry;
+						{completed: !entry.completed}) : entry;
 				};
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
 						{
 							entries: A2(elm$core$List$map, updateEntry, model.entries)
+						}),
+					elm$core$Platform$Cmd$none);
+			case 'ClearCompleted':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							entries: A2(
+								elm$core$List$filter,
+								function (entry) {
+									return !entry.completed;
+								},
+								model.entries)
 						}),
 					elm$core$Platform$Cmd$none);
 			default:
@@ -4917,9 +4942,10 @@ var author$project$Main$update = F2(
 		}
 	});
 var author$project$Main$ClearAll = {$: 'ClearAll'};
+var author$project$Main$ClearCompleted = {$: 'ClearCompleted'};
 var author$project$Main$UpdateEntries = {$: 'UpdateEntries'};
-var author$project$Main$Complete = function (a) {
-	return {$: 'Complete', a: a};
+var author$project$Main$Check = function (a) {
+	return {$: 'Check', a: a};
 };
 var elm$core$Basics$identity = function (x) {
 	return x;
@@ -4939,11 +4965,33 @@ var elm$virtual_dom$VirtualDom$toHandlerInt = function (handler) {
 			return 3;
 	}
 };
-var elm$html$Html$button = _VirtualDom_node('button');
 var elm$html$Html$div = _VirtualDom_node('div');
+var elm$html$Html$input = _VirtualDom_node('input');
+var elm$html$Html$label = _VirtualDom_node('label');
 var elm$html$Html$li = _VirtualDom_node('li');
 var elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var elm$html$Html$text = elm$virtual_dom$VirtualDom$text;
+var elm$json$Json$Encode$bool = _Json_wrap;
+var elm$html$Html$Attributes$boolProperty = F2(
+	function (key, bool) {
+		return A2(
+			_VirtualDom_property,
+			key,
+			elm$json$Json$Encode$bool(bool));
+	});
+var elm$html$Html$Attributes$checked = elm$html$Html$Attributes$boolProperty('checked');
+var elm$json$Json$Encode$string = _Json_wrap;
+var elm$html$Html$Attributes$stringProperty = F2(
+	function (key, string) {
+		return A2(
+			_VirtualDom_property,
+			key,
+			elm$json$Json$Encode$string(string));
+	});
+var elm$html$Html$Attributes$class = elm$html$Html$Attributes$stringProperty('className');
+var elm$html$Html$Attributes$for = elm$html$Html$Attributes$stringProperty('htmlFor');
+var elm$html$Html$Attributes$id = elm$html$Html$Attributes$stringProperty('id');
+var elm$html$Html$Attributes$type_ = elm$html$Html$Attributes$stringProperty('type');
 var elm$virtual_dom$VirtualDom$Normal = function (a) {
 	return {$: 'Normal', a: a};
 };
@@ -4962,6 +5010,7 @@ var elm$html$Html$Events$onClick = function (msg) {
 		elm$json$Json$Decode$succeed(msg));
 };
 var author$project$Main$viewEntry = function (entry) {
+	var inputId = elm$core$String$fromInt(entry.id);
 	return A2(
 		elm$html$Html$li,
 		_List_Nil,
@@ -4972,18 +5021,28 @@ var author$project$Main$viewEntry = function (entry) {
 				_List_Nil,
 				_List_fromArray(
 					[
-						elm$html$Html$text(entry.content),
-						(!entry.completed) ? A2(
-						elm$html$Html$button,
+						A2(
+						elm$html$Html$input,
 						_List_fromArray(
 							[
+								elm$html$Html$Attributes$class('check'),
+								elm$html$Html$Attributes$id(inputId),
+								elm$html$Html$Attributes$type_('checkbox'),
+								elm$html$Html$Attributes$checked(entry.completed),
 								elm$html$Html$Events$onClick(
-								author$project$Main$Complete(entry.id))
+								author$project$Main$Check(entry.id))
+							]),
+						_List_Nil),
+						A2(
+						elm$html$Html$label,
+						_List_fromArray(
+							[
+								elm$html$Html$Attributes$for(inputId)
 							]),
 						_List_fromArray(
 							[
-								elm$html$Html$text('Done!')
-							])) : A2(elm$html$Html$div, _List_Nil, _List_Nil)
+								elm$html$Html$text(entry.content)
+							]))
 					]))
 			]));
 };
@@ -4994,17 +5053,6 @@ var author$project$Main$viewKeyedEntry = function (entry) {
 		elm$core$String$fromInt(entry.id),
 		A2(elm$html$Html$Lazy$lazy, author$project$Main$viewEntry, entry));
 };
-var elm$core$List$filter = F2(
-	function (isGood, list) {
-		return A3(
-			elm$core$List$foldr,
-			F2(
-				function (x, xs) {
-					return isGood(x) ? A2(elm$core$List$cons, x, xs) : xs;
-				}),
-			_List_Nil,
-			list);
-	});
 var elm$virtual_dom$VirtualDom$keyedNode = function (tag) {
 	return _VirtualDom_keyedNode(
 		_VirtualDom_noScript(tag));
@@ -5029,27 +5077,8 @@ var author$project$Main$viewEntries = F2(
 var author$project$Main$UpdateField = function (a) {
 	return {$: 'UpdateField', a: a};
 };
-var elm$html$Html$input = _VirtualDom_node('input');
-var elm$json$Json$Encode$bool = _Json_wrap;
-var elm$html$Html$Attributes$boolProperty = F2(
-	function (key, bool) {
-		return A2(
-			_VirtualDom_property,
-			key,
-			elm$json$Json$Encode$bool(bool));
-	});
 var elm$html$Html$Attributes$autofocus = elm$html$Html$Attributes$boolProperty('autofocus');
-var elm$json$Json$Encode$string = _Json_wrap;
-var elm$html$Html$Attributes$stringProperty = F2(
-	function (key, string) {
-		return A2(
-			_VirtualDom_property,
-			key,
-			elm$json$Json$Encode$string(string));
-	});
-var elm$html$Html$Attributes$class = elm$html$Html$Attributes$stringProperty('className');
 var elm$html$Html$Attributes$placeholder = elm$html$Html$Attributes$stringProperty('placeholder');
-var elm$html$Html$Attributes$type_ = elm$html$Html$Attributes$stringProperty('type');
 var elm$html$Html$Attributes$value = elm$html$Html$Attributes$stringProperty('value');
 var elm$html$Html$Events$alwaysStop = function (x) {
 	return _Utils_Tuple2(x, true);
@@ -5101,7 +5130,7 @@ var author$project$Main$viewInput = function (model) {
 					_List_fromArray(
 						[
 							elm$html$Html$Attributes$type_('text'),
-							elm$html$Html$Attributes$placeholder('Something to do'),
+							elm$html$Html$Attributes$placeholder('Add new task here...'),
 							elm$html$Html$Attributes$autofocus(true),
 							elm$html$Html$Attributes$value(model.field),
 							elm$html$Html$Events$onInput(author$project$Main$UpdateField)
@@ -5109,11 +5138,10 @@ var author$project$Main$viewInput = function (model) {
 					_List_Nil))
 			]));
 };
+var elm$html$Html$button = _VirtualDom_node('button');
 var elm$html$Html$h1 = _VirtualDom_node('h1');
-var elm$html$Html$h2 = _VirtualDom_node('h2');
 var elm$html$Html$header = _VirtualDom_node('header');
 var elm$html$Html$p = _VirtualDom_node('p');
-var elm$html$Html$section = _VirtualDom_node('section');
 var elm$virtual_dom$VirtualDom$lazy2 = _VirtualDom_lazy2;
 var elm$html$Html$Lazy$lazy2 = elm$virtual_dom$VirtualDom$lazy2;
 var author$project$Main$view = function (model) {
@@ -5159,48 +5187,53 @@ var author$project$Main$view = function (model) {
 							]))
 					])),
 				A2(
-				elm$html$Html$section,
+				elm$html$Html$div,
 				_List_fromArray(
 					[
-						elm$html$Html$Attributes$class('active-task')
+						elm$html$Html$Attributes$class('active-entries')
 					]),
 				_List_fromArray(
 					[
-						A2(
-						elm$html$Html$h2,
-						_List_Nil,
-						_List_fromArray(
-							[
-								elm$html$Html$text('Active')
-							])),
 						A3(elm$html$Html$Lazy$lazy2, author$project$Main$viewEntries, false, model.entries)
 					])),
 				A2(
-				elm$html$Html$section,
+				elm$html$Html$div,
 				_List_fromArray(
 					[
-						elm$html$Html$Attributes$class('completed-task')
+						elm$html$Html$Attributes$class('completed-entries')
+					]),
+				_List_fromArray(
+					[
+						A3(elm$html$Html$Lazy$lazy2, author$project$Main$viewEntries, true, model.entries)
+					])),
+				A2(
+				elm$html$Html$div,
+				_List_fromArray(
+					[
+						elm$html$Html$Attributes$class('control')
 					]),
 				_List_fromArray(
 					[
 						A2(
-						elm$html$Html$h2,
-						_List_Nil,
+						elm$html$Html$button,
 						_List_fromArray(
 							[
-								elm$html$Html$text('Completed')
+								elm$html$Html$Events$onClick(author$project$Main$ClearCompleted)
+							]),
+						_List_fromArray(
+							[
+								elm$html$Html$text('Clear Completed Task')
 							])),
-						A3(elm$html$Html$Lazy$lazy2, author$project$Main$viewEntries, true, model.entries)
-					])),
-				A2(
-				elm$html$Html$button,
-				_List_fromArray(
-					[
-						elm$html$Html$Events$onClick(author$project$Main$ClearAll)
-					]),
-				_List_fromArray(
-					[
-						elm$html$Html$text('Clear All')
+						A2(
+						elm$html$Html$button,
+						_List_fromArray(
+							[
+								elm$html$Html$Events$onClick(author$project$Main$ClearAll)
+							]),
+						_List_fromArray(
+							[
+								elm$html$Html$text('Clear All')
+							]))
 					]))
 			]));
 };

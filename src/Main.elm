@@ -4,6 +4,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Html.Lazy exposing (lazy, lazy2)
 import Html.Keyed as Keyed
+import Json exposing (Decode)
 
 
 
@@ -69,7 +70,8 @@ type Msg
   = NoOp
   | UpdateField String
   | UpdateEntries
-  | Complete Int
+  | Check Int
+  | ClearCompleted
   | ClearAll
 
 
@@ -98,11 +100,11 @@ update msg model =
       , Cmd.none
       )
 
-    Complete id ->
+    Check id ->
       let
         updateEntry entry =
           if entry.id == id then
-            { entry | completed = True }
+            { entry | completed = not entry.completed }
           else
             entry
       in
@@ -110,10 +112,17 @@ update msg model =
         , Cmd.none
         )
 
+    ClearCompleted ->
+      ( { model | entries = List.filter (\entry -> not entry.completed )
+      model.entries }
+      , Cmd.none
+      )
+
+
     ClearAll ->
-        ( { model | entries = [] }
-        , Cmd.none
-        )
+      ( { model | entries = [] }
+      , Cmd.none
+      )
 
 
 
@@ -134,18 +143,29 @@ view model =
                 [ text "Add" ]
             ]
         ]
-    , section
-        [ class "active-task" ]
-        [ h2 [] [ text "Active" ]
-        , lazy2 viewEntries False model.entries
+    , div
+        [ class "active-entries" ]
+        [ lazy2 viewEntries False model.entries ]
+    , div
+        [ class "completed-entries" ]
+        [ lazy2 viewEntries True model.entries ]
+    , div
+        [ class "control" ]
+        [ button [ onClick ( ClearCompleted ) ] [ text "Clear Completed Task" ]
+        , button [ onClick ( ClearAll ) ] [ text "Clear All" ]
         ]
-    , section
-        [ class "completed-task" ]
-        [ h2 [] [ text "Completed" ]
-        , lazy2 viewEntries True model.entries
-        ]
-    , button [ onClick ( ClearAll ) ] [ text "Clear All" ]
     ]
+
+onEnter : Msg -> Attribute Msg
+onEnter msg =
+    let
+        isEnter code =
+            if code == 13 then
+                Decod.succeed msg
+            else
+                Decod.fail "not ENTER"
+    in
+        on "keydown" (Decod.andThen isEnter keyCode)
 
 
 viewInput : Model -> Html Msg
@@ -155,10 +175,11 @@ viewInput model =
     [ ( "aaa"
       , input
           [ type_ "text"
-          , placeholder "Something to do"
+          , placeholder "Add new task here..."
           , autofocus True
           , value model.field
           , onInput UpdateField
+					, onEnter UpdateEntries
           ]
           []
       )
@@ -175,7 +196,6 @@ viewEntries isCompleted entries =
     )
 
 
-
 viewKeyedEntry : Entry -> ( String, Html Msg )
 viewKeyedEntry entry =
   ( String.fromInt entry.id, lazy viewEntry entry )
@@ -183,12 +203,21 @@ viewKeyedEntry entry =
 
 viewEntry : Entry -> Html Msg
 viewEntry entry =
-  li []
-     [ div []
-           [ text entry.content
-           , if entry.completed == False then
-               button [ onClick ( Complete entry.id ) ] [ text "Done!" ]
-             else
-               div [] []
-           ]
-     ]
+  let
+    inputId = String.fromInt entry.id
+  in
+    li []
+       [ div []
+             [ input
+                [ class "check"
+                , id inputId
+                , type_ "checkbox"
+                , checked entry.completed
+                , onClick ( Check entry.id )
+                ]
+                []
+             , label
+                [ for inputId ]
+                [ text entry.content ]
+             ]
+       ]
