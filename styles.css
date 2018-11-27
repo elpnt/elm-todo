@@ -3,7 +3,7 @@
 * {
   margin: 0;
   padding: 0;
-  font-family: 'arial black';
+  font-family: YuGothic ;
 }
 
 body {
@@ -15,37 +15,19 @@ li {
   list-style-type: none;
 }
 
-button{
-    font-size: 12px;
-    padding: 0.5em 1em;
-    background: #668ad8;
-    color: #FFF;
-    border-bottom: solid 2px #627295;
-    border-radius: 2px;
-    margin-bottom: 10px;
-}
-
-
-button:hover {
-    -ms-transform: translateY(2px);
-    -webkit-transform: translateY(2px);
-    transform: translateY(2px);
-    border-bottom: none;
-  }
 
 
 /* Headline */
 
 h1 {
   font-size: 40px;
-  font-family: 'arial black';
   text-align: left;
-  background: orange;
+  background: #555555;
+  color: #FFF;
   padding: 20px;
 }
 
 h2 {
-  font-family: 'arial black';
   font-size: 30px;
 }
 
@@ -54,6 +36,7 @@ h2 {
 
 header {
   text-align: center;
+  margin-bottom: 10px;
 }
 
 header p {
@@ -62,6 +45,62 @@ header p {
 
 input {
   font-size: 24px;
+  margin-top: 10px;
   margin-left: 10px;
   margin-right: 10px;
 }
+
+header button {
+  font-size: 24px;
+  padding: 0 8px;
+  border-style: none;
+  color: #FFF;
+  background-color: #F39800;
+  -webkit-transition: all 0.1s;
+  transition: all 0.1s;
+}
+
+header button:hover {
+  background-color: #F9C500;
+}
+
+
+/* Active task list */
+
+.active-entries {
+  font-size: 20px;
+}
+
+.active-entries button {
+  font-size: 20px;
+}
+
+
+
+/* Completed task list */
+
+.completed-entries {
+  color: gray;
+  font-size: 20px;
+  text-decoration: line-through;
+}
+
+
+/* Clear Button */
+
+.control button {
+  font-size: 16px;
+  margin-top: 10px;
+  margin-right: 10px;
+  padding: 0 8px;
+  border-style: none;
+  color: #FFF;
+  background-color: #0E7AC4;
+  -webkit-transition: all 0.1s;
+  transition: all 0.1s;
+}
+
+.control button:hover {
+  background-color: #40AAEF;
+}
+
