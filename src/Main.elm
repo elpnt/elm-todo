@@ -2,7 +2,7 @@ import Browser
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Html.Lazy exposing (lazy)
+import Html.Lazy exposing (lazy, lazy2)
 import Html.Keyed as Keyed
 
 
@@ -23,24 +23,35 @@ main =
 -- MODEL
 
 
-type alias Todo = String
+type alias Entry =
+  { content : String
+  , id : Int
+  , completed : Bool
+  }
+
+
+newEntry : String -> Int -> Entry
+newEntry content id =
+  { content = content
+  , id = id
+  , completed = False
+  }
 
 
 type alias Model =
-  { field : Todo
-  , id : Int
-  , todoList : List Todo
-  , doneList : List Todo
+  { field : String
+  , entries : List Entry
+  , uid : Int
   }
 
 
 initialModel : Model
 initialModel =
   { field = ""
-  , id = 0
-  , todoList = []
-  , doneList = []
+  , entries = []
+  , uid = 0
   }
+
 
 
 init : () -> ( Model, Cmd Msg )
@@ -56,10 +67,10 @@ init _ =
 
 type Msg
   = NoOp
-  | UpdateField Todo
-  | UpdateTodoList (List Todo)
-  | CompleteTask Int
-  | ClearAll (List Todo)
+  | UpdateField String
+  | UpdateEntries
+  | Complete Int
+  | ClearAll
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -75,28 +86,35 @@ update msg model =
       , Cmd.none
       )
 
-    UpdateTodoList todolist ->
-      ( { model | todoList = model.field :: todolist
-                , id = model.id + 1
-                , field = "" }
+    UpdateEntries ->
+      ( { model | uid = model.uid + 1
+                , field = ""
+                , entries =
+                    if String.isEmpty model.field then
+                      model.entries
+                    else
+                      model.entries ++ [ newEntry model.field model.uid ]
+        }
       , Cmd.none
       )
 
-    CompleteTask uid ->
-      ( { model | todoList = updateTodoListWhenCompleted uid model.todoList
-                , doneList = "a" :: model.doneList }
-      , Cmd.none
-      )
+    Complete id ->
+      let
+        updateEntry entry =
+          if entry.id == id then
+            { entry | completed = True }
+          else
+            entry
+      in
+        ( { model | entries = List.map updateEntry model.entries }
+        , Cmd.none
+        )
 
-    ClearAll todolist ->
-      ( { model | todoList = [] }
-      , Cmd.none
-      )
+    ClearAll ->
+        ( { model | entries = [] }
+        , Cmd.none
+        )
 
-
-updateTodoListWhenCompleted : Int -> List Todo -> List Todo
-updateTodoListWhenCompleted idx todolist =
-  (List.take idx todolist) ++ (List.drop idx todolist)
 
 
 -- VIEW
@@ -106,19 +124,19 @@ view : Model -> Html Msg
 view model =
   div []
     [ h1 [] [ text "ToDo App by Elm" ]
-    , renderInput model
-    , button [ onClick ( UpdateTodoList model.todoList ) ] [ text "Add" ]
-    , viewTodoList model.todoList
-    -- , viewDoneList model.doneList
-    , button [ onClick ( ClearAll model.todoList ) ] [ text "Clear All" ]
+    , lazy viewInput model
+    , button [ onClick ( UpdateEntries) ] [ text "Add" ]
+    , lazy2 viewEntries False model.entries  -- not done yet
+    , lazy2 viewEntries True model.entries   -- completed!
+    , button [ onClick ( ClearAll ) ] [ text "Clear All" ]
     ]
 
 
-renderInput : Model -> Html Msg
-renderInput model =
+viewInput : Model -> Html Msg
+viewInput model =
   Keyed.node "div"
     []
-    [ ( "a" -- String.fromInt model.id
+    [ ( "aaa"
       , input
           [ type_ "text"
           , placeholder "Something to do"
@@ -131,26 +149,30 @@ renderInput model =
     ]
 
 
-viewTodoList : List Todo -> Html Msg
-viewTodoList todolist =
-  ul [] ( List.map viewTodo todolist )
+viewEntries : Bool -> List Entry -> Html Msg
+viewEntries isCompleted entries =
+  Keyed.ul
+    []
+    ( entries
+        |> List.filter (\entry -> entry.completed == isCompleted)
+        |> List.map viewKeyedEntry
+    )
 
 
-viewTodo : Todo -> Html Msg
-viewTodo todo =
+
+viewKeyedEntry : Entry -> ( String, Html Msg )
+viewKeyedEntry entry =
+  ( String.fromInt entry.id, lazy viewEntry entry )
+
+
+viewEntry : Entry -> Html Msg
+viewEntry entry =
   li []
-    [ div []
-        [ text todo
-        -- , button [ onClick ( CompleteTask 1 ) ] [ text "Done!" ]
-        ]
-    ]
-
-
-viewDoneList : List Todo -> Html Msg
-viewDoneList donelist =
-  ul [] ( List.map viewDone donelist )
-
-
-viewDone : Todo -> Html Msg
-viewDone done =
-  li [] [ text done ]
+     [ div []
+           [ text entry.content
+           , if entry.completed == False then
+               button [ onClick ( Complete entry.id ) ] [ text "Done!" ]
+             else
+               div [] []
+           ]
+     ]
