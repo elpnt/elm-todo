@@ -172,10 +172,10 @@ viewInput : Model -> Html Msg
 viewInput model =
   Keyed.node "p"
     [ class "input-area" ]
-    [ ( "aaa"
+    [ ( String.fromInt model.uid
       , input
           [ type_ "text"
-          , placeholder "Add new task here..."
+          , placeholder "Enter your your task"
           , autofocus True
           , value model.field
           , onInput UpdateField

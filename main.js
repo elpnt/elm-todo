@@ -5137,13 +5137,13 @@ var author$project$Main$viewInput = function (model) {
 		_List_fromArray(
 			[
 				_Utils_Tuple2(
-				'aaa',
+				elm$core$String$fromInt(model.uid),
 				A2(
 					elm$html$Html$input,
 					_List_fromArray(
 						[
 							elm$html$Html$Attributes$type_('text'),
-							elm$html$Html$Attributes$placeholder('Add new task here...'),
+							elm$html$Html$Attributes$placeholder('Enter your your task'),
 							elm$html$Html$Attributes$autofocus(true),
 							elm$html$Html$Attributes$value(model.field),
 							elm$html$Html$Events$onInput(author$project$Main$UpdateField),
