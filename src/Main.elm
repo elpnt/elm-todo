@@ -175,7 +175,7 @@ viewInput model =
     [ ( String.fromInt model.uid
       , input
           [ type_ "text"
-          , placeholder "Enter your your task"
+          , placeholder "Enter your task"
           , autofocus True
           , value model.field
           , onInput UpdateField

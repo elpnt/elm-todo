@@ -5143,7 +5143,7 @@ var author$project$Main$viewInput = function (model) {
 					_List_fromArray(
 						[
 							elm$html$Html$Attributes$type_('text'),
-							elm$html$Html$Attributes$placeholder('Enter your your task'),
+							elm$html$Html$Attributes$placeholder('Enter your task'),
 							elm$html$Html$Attributes$autofocus(true),
 							elm$html$Html$Attributes$value(model.field),
 							elm$html$Html$Events$onInput(author$project$Main$UpdateField),
